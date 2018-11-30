@@ -41,7 +41,7 @@ python MarkdownBearGithubTOC.py -h <default: 3> -t bear [--no-write] "Bear Note 
 
 | **Original Note**  | **Note with ToC** |
 | :---:  | :---:  |
-|![Original Note](https://github.com/alexander-lee/markdown-github-bear-toc/blob/master/images/Original%20Note.png?raw=true)|![Note with ToC](https://github.com/alexander-lee/markdown-github-bear-toc/blob/master/images/Note%20With%20ToC.png?raw=true)|
+|![Original Note](https://github.com/alexander-lee/markdown-github-bear-toc/blob/master/images/Original%20Note.png?raw=true)|![Note with ToC](https://github.com/alexander-lee/markdown-github-bear-toc/blob/master/images/Note%20with%20ToC.png?raw=true)|
 
 ### With Markdown Files
 Add of a Table of Contents to README.md (Using Github Anchors)
