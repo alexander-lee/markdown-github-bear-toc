@@ -42,21 +42,25 @@ $ python3 setup.py install
 ```sh
 $ markdown-toc -h <default: 3> -t bear [--no-write] "Bear Note Title"
 ```
+‎
 
 * Add a Table of Contents to a Bear Note with the UUID `20703126-FA33-400A-B98E-F55F57E3EF48-47683-000143B2335758CA`
 ```sh
 $ markdown-toc -h <default: 3> -t bear [--no-write] "20703126-FA33-400A-B98E-F55F57E3EF48-47683-000143B2335758CA"
 ```
+‎
 
 * Add a Table of Contents to two Bear Notes with titles "Bear Note Title 1" and "Bear Note Title 2"
 ```sh
 $ markdown-toc -h <default: 3> -t bear [--no-write] "Bear Note Title 1" "Bear Note Title 2"
 ```
+‎
 
 * Add a Table of Contents to all Bear Notes that contain the tag *#bear* OR tag *#beet*
 ```sh
 $ markdown-toc -h <default: 3> -t bear [--no-write] "#bear" "#beet"
 ```
+‎
 
 * This allows you to take input a list of Bear Note titles, tags, or UUIDs and will inject the ToC into your note whether or not you submit the `--no-write` flag.
 * If you have `#tags` at the top of your note (cause I use them to categorize my notes), it will inject the ToC right after any tags.
@@ -70,6 +74,7 @@ $ markdown-toc -h <default: 3> -t bear [--no-write] "#bear" "#beet"
 ```sh
 $ markdown-toc -h <default: 3> -t github [--no-write] README.md
 ```
+‎
 
 * Add of a Table of Contents to README.md and Folder/README2.md (Using Github Anchors)
 ```sh
