@@ -56,7 +56,7 @@ $ markdown-toc -h <default: 3> -t bear [--no-write] "Bear Note Title 1" "Bear No
 ```
 ‎
 
-* Add a Table of Contents to all Bear Notes that contain the tag *#bear* OR tag *#beet*
+* Add a Table of Contents to all Bear Notes that contain the tag `#bear` OR tag `#beet`
 ```sh
 $ markdown-toc -h <default: 3> -t bear [--no-write] "#bear" "#beet"
 ```
