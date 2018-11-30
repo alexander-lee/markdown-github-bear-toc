@@ -260,7 +260,7 @@ if __name__ == '__main__':
 
     if (params['type'] == 'bear' and params['write']):
 
-        print('\n==== [DONE] ====')
+        print('==== [DONE] ====')
         print('To see your changes, please restart Bear!')
 
     if params['type'] == 'bear':
