@@ -26,7 +26,7 @@ parser.add_argument('-h', '--header-priority', type=int, dest='header_priority',
 parser.add_argument('-t', '--type', type=str.lower, dest='type', choices=['github', 'bear'], default='github',
                     help='(Default: github) Github Anchors or Bear Anchors')
 
-parser.add_argument('-nw', '--no-write', dest='write', action='store_false',
+parser.add_argument('--no-write', dest='write', action='store_false',
                     help='(Default: True) Whether or not write Table of Contents to file or note automatically')
 
 parser.add_argument('-toc', '--table-of-contents-style', dest='toc', default='# Table of Contents',
@@ -133,9 +133,10 @@ def create_table_of_contents(header_priority_pairs, note_uuid=None):
     """
     bullet_list = [params['toc']]
 
+    highest_priority = min(header_priority_pairs, key=lambda pair: pair[1])[1]
     for header, priority in header_priority_pairs:
         md_anchor = create_bear_header_anchor(header, note_uuid) if params['type'] == 'bear' else create_github_header_anchor(header)
-        bullet_list.append('\t' * (priority - 1) + '* ' + md_anchor)
+        bullet_list.append('\t' * (priority - highest_priority) + '* ' + md_anchor)
 
     # Specifically for Bear add separator
     if params['type'] == 'bear':
@@ -182,7 +183,6 @@ def create_table_of_contents_bear():
 
         md_text_toc_pairs.append((md_text, table_of_contents_lines))
         uuids.append(uuid)
-
 
     return md_text_toc_pairs, uuids
 
@@ -255,8 +255,6 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-    ## WRITE STILL DEOSNT OWRK FOR GITHUB
 
     if (params['type'] == 'bear' and params['write']):
 
