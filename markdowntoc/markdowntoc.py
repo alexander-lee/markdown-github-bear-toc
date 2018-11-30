@@ -74,8 +74,12 @@ def get_headers(md_text, max_priority):
 
     # List of Tuples: (Header Title, Number of #)
     header_priority_pairs = []
+    in_code_block = False
     for line in lines_iter:
-        if line.startswith('#') and ' ' in line:
+        if line.startswith('```'):
+            in_code_block = not in_code_block
+
+        elif not in_code_block and line.startswith('#') and ' ' in line:
             md_header, header_title = line.split(' ', 1)
 
             # Check if md_header has all '#'
@@ -257,7 +261,6 @@ if __name__ == '__main__':
     main()
 
     if (params['type'] == 'bear' and params['write']):
-
         print('==== [DONE] ====')
         print('To see your changes, please restart Bear!')
 
