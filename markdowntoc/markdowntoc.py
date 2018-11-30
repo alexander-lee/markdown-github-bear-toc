@@ -81,11 +81,13 @@ def get_tags_in_note(md_text):
     text_no_code = '\n'.join(text_no_code)
 
     # Match all tags
-    # Positive Lookbehind: newline character or ' '
+    # Positive Lookbehind 1: Start of character
+    # Positive Lookbehind 2: newline character or ' ' (needs to be separate cause Python only takes fixed-length lookbehinds)
     # Group 1: Starts with '#' and ends with '#' as long as middle is not '#' or a newline character (#tags#)
     # Group 2: Starts with '#' and is not succeeded by a '#', ' ', or newline character (#tags)
     # We need two groups because '#tags#' can have spaces where '#tags' cannot
-    tag_matches = re.findall(r'(?<=\n|\r| )(#[^#\r\n]+#|#[^#\r\n ]+)', text_no_code, re.MULTILINE)
+    tag_matches = re.findall(r'((?<=^)|(?<=\n|\r| ))(#[^#\r\n]+#|#[^#\r\n ]+)', text_no_code, re.MULTILINE)
+    tag_matches = map(lambda match: match[1], tag_matches)  # Second Capture Group
     return set(tag_matches)
 
 
@@ -171,7 +173,7 @@ def create_table_of_contents(header_priority_pairs, note_uuid=None):
     Returns a list of strings containing the Table of Contents.
     """
     if len(header_priority_pairs) == 0:
-        return []
+        return None
 
     bullet_list = [params['toc']]
 
@@ -203,11 +205,18 @@ def create_table_of_contents_bear():
         # modified = row['ZMODIFICATIONDATE']
 
         if has_table_of_contents(md_text):
-            print('[WARNING]: {} already has a Table of Contents, Ignoring...'.format(title))
+            print('[WARNING]: \'{}\' already has a Table of Contents, Ignoring...'.format(title))
             continue
 
         header_list = get_headers(md_text, params['header_priority'])
         table_of_contents_lines = create_table_of_contents(header_list, uuid)
+
+        if table_of_contents_lines is None:
+            print('[WARNING]: \'{}\' has no headers to create a Table of Contents, Ignoring...'.format(title))
+            continue
+
+        if (params['write']):
+            print('Creating a Table of Contents for \'{}\''.format(title))
 
         md_text_toc_pairs.append((md_text, table_of_contents_lines))
         uuids.append(uuid)
@@ -240,6 +249,13 @@ def create_table_of_contents_github():
                 header_list = get_headers(md_text, params['header_priority'])
                 table_of_contents_lines = create_table_of_contents(header_list)
 
+                if table_of_contents_lines is None:
+                    print('[WARNING]: {} has no headers to create a Table of Contents, Ignoring...'.format(filepath))
+                    continue
+
+                if (params['write']):
+                    print('Creating a Table of Contents for \'{}\''.format(filepath))
+
                 md_text_toc_pairs.append((md_text, table_of_contents_lines))
                 valid_filepaths.append(filepath)
 
@@ -257,7 +273,7 @@ def find_note_contents_start(md_text_lines):
     # Start at 1 to skip the title
     # Look for regex matches of tags and if lines from the top contain tags, then skip
     for i in range(1, len(md_text_lines)):
-        if re.search(r'(?<=\n|\r| )(#[^#\r\n]+#|#[^#\r\n ]+)', md_text_lines[i]) is None:
+        if re.search(r'((?<=^)|(?<=\n|\r| ))(#[^#\r\n]+#|#[^#\r\n ]+)', md_text_lines[i]) is None:
             return i
 
     return len(md_text_lines) - 1
@@ -286,6 +302,7 @@ def main():
                 update_query = "UPDATE `ZSFNOTE` SET `ZTEXT`=? WHERE `ZUNIQUEIDENTIFIER`=?"
                 cursor.execute(update_query, (updated_md_text, identifiers[i]))
                 conn.commit()
+                pass
             elif (params['type'] == 'github'):
                 # Update File
                 with open(identifiers[i], 'w') as file:
@@ -298,7 +315,7 @@ def main():
 if __name__ == '__main__':
     main()
 
-    if (params['type'] == 'bear' and params['write']):
+    if params['type'] == 'bear' and params['write']:
         print('==== [DONE] ====')
         print('To see your changes, please restart Bear!')
 
