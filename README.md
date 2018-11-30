@@ -38,22 +38,27 @@ $ python3 setup.py install
 * `-toc` or `--table-of-contents-style` is the Markdown style for your Table of Contents header
 
 ### With Bear
-Add a Table of Contents to a Bear Note with the title "Bear Note Title"
+* Add a Table of Contents to a Bear Note with the title "Bear Note Title"
 ```sh
 $ markdown-toc -h <default: 3> -t bear [--no-write] "Bear Note Title"
 ```
 
-Add a Table of Contents to a Bear Note with the UUID 20703126-FA33-400A-B98E-F55F57E3EF48-47683-000143B2335758CA
+* Add a Table of Contents to a Bear Note with the UUID `20703126-FA33-400A-B98E-F55F57E3EF48-47683-000143B2335758CA`
 ```sh
 $ markdown-toc -h <default: 3> -t bear [--no-write] "20703126-FA33-400A-B98E-F55F57E3EF48-47683-000143B2335758CA"
 ```
 
-Add a Table of Contents to two Bear Notes with titles "Bear Note Title 1" and "Bear Note Title 2"
+* Add a Table of Contents to two Bear Notes with titles "Bear Note Title 1" and "Bear Note Title 2"
 ```sh
 $ markdown-toc -h <default: 3> -t bear [--no-write] "Bear Note Title 1" "Bear Note Title 2"
 ```
 
-* This allows you to take input a list of Bear Note titles or UUIDs and will inject the ToC into your note whether or not you submit the `--no-write` flag.
+* Add a Table of Contents to all Bear Notes that contain the tag *#bear* OR tag *#beet*
+```sh
+$ markdown-toc -h <default: 3> -t bear [--no-write] "#bear" "#beet"
+```
+
+* This allows you to take input a list of Bear Note titles, tags, or UUIDs and will inject the ToC into your note whether or not you submit the `--no-write` flag.
 * If you have `#tags` at the top of your note (cause I use them to categorize my notes), it will inject the ToC right after any tags.
 
 | **Original Note**  | **Note with ToC** |
@@ -61,12 +66,12 @@ $ markdown-toc -h <default: 3> -t bear [--no-write] "Bear Note Title 1" "Bear No
 |![Original Note](https://github.com/alexander-lee/markdown-github-bear-toc/blob/master/images/Original%20Note.png?raw=true)|![Note with ToC](https://github.com/alexander-lee/markdown-github-bear-toc/blob/master/images/Note%20with%20ToC.png?raw=true)|
 
 ### With Markdown Files
-Add of a Table of Contents to README.md (Using Github Anchors)
+* Add of a Table of Contents to README.md (Using Github Anchors)
 ```sh
 $ markdown-toc -h <default: 3> -t github [--no-write] README.md
 ```
 
-Add of a Table of Contents to README.md and Folder/README2.md (Using Github Anchors)
+* Add of a Table of Contents to README.md and Folder/README2.md (Using Github Anchors)
 ```sh
 $ markdown-toc -h <default: 3> -t github [--no-write] README.md Folder/README2.md
 ```

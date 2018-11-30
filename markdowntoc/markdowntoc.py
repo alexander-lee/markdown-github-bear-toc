@@ -18,7 +18,7 @@ parser.add_argument('--help', action='help',
                     help='Show this help message and exit')
 
 parser.add_argument('name', nargs='+', type=str,
-                    help='Bear Note UUID, Bear Note Title, or Markdown file')
+                    help='Bear Note UUID, Bear Note Title, Bear Note Tag, or Markdown file')
 
 parser.add_argument('-h', '--header-priority', type=int, dest='header_priority', default=3,
                     help='(Default: 3) Maximum Header Priority/Strength to consider as Table of Contents')
@@ -51,7 +51,42 @@ def get_notes_from_bear():
     read_query = "SELECT * FROM `ZSFNOTE` WHERE `ZTRASHED` LIKE '0' AND `ZARCHIVED` LIKE '0'"
     notes = cursor.execute(read_query)
 
-    return list(filter(lambda note: note['ZTITLE'] in params['name'] or note['ZUNIQUEIDENTIFIER'] in params['name'], notes))
+    def match_title_uuid_tag(note):
+        note_tags = get_tags_in_note(note['ZTEXT'])
+        for query in params['name']:
+            if query in note_tags or query == note['ZTITLE'] or query == note['ZUNIQUEIDENTIFIER']:
+                return True
+        return False
+
+    return list(filter(lambda note: match_title_uuid_tag(note), notes))
+
+
+def get_tags_in_note(md_text):
+    """
+    Returns a set of tags that exist in the note using the RegEx. Tags are elements that are preceeded by '#'.
+    """
+
+    # First, ignore all code blocks since our regex is unable to handle it
+    text_no_code = []
+
+    lines_iter = iter(md_text.splitlines())
+    in_code_block = False
+    for line in lines_iter:
+        if line.startswith('```'):
+            in_code_block = not in_code_block
+
+        if not in_code_block:
+            text_no_code.append(line)
+
+    text_no_code = '\n'.join(text_no_code)
+
+    # Match all tags
+    # Positive Lookbehind: newline character or ' '
+    # Group 1: Starts with '#' and ends with '#' as long as middle is not '#' or a newline character (#tags#)
+    # Group 2: Starts with '#' and is not succeeded by a '#', ' ', or newline character (#tags)
+    # We need two groups because '#tags#' can have spaces where '#tags' cannot
+    tag_matches = re.findall(r'(?<=\n|\r| )(#[^#\r\n]+#|#[^#\r\n ]+)', text_no_code, re.MULTILINE)
+    return set(tag_matches)
 
 
 def has_table_of_contents(md_text):
@@ -135,6 +170,9 @@ def create_table_of_contents(header_priority_pairs, note_uuid=None):
     """
     Returns a list of strings containing the Table of Contents.
     """
+    if len(header_priority_pairs) == 0:
+        return []
+
     bullet_list = [params['toc']]
 
     highest_priority = min(header_priority_pairs, key=lambda pair: pair[1])[1]
@@ -147,20 +185,6 @@ def create_table_of_contents(header_priority_pairs, note_uuid=None):
         bullet_list.append('---')
 
     return bullet_list
-
-
-def find_note_contents_start(md_text_lines):
-    """
-    Some notes in Bear contain #tags near the title. This returns the index in the list that\
-    isn't the title or contains tags. If no index found, return len(md_text_lines) - 1
-    """
-    # Start at 1 to skip the title
-    # Look for regex matches of tags and if lines from the top contain tags, then skip
-    for i in range(1, len(md_text_lines)):
-        if re.search(r'#\w+', md_text_lines[i]) is None:
-            return i
-
-    return len(md_text_lines) - 1
 
 
 def create_table_of_contents_bear():
@@ -223,6 +247,20 @@ def create_table_of_contents_github():
             print('[ERROR]: {} doesn\'t exist or cannot be read, Ignoring...'.format(filepath))
 
     return md_text_toc_pairs, valid_filepaths
+
+
+def find_note_contents_start(md_text_lines):
+    """
+    Some notes in Bear contain #tags near the title. This returns the index in the list that\
+    isn't the title or contains tags. If no index found, return len(md_text_lines) - 1
+    """
+    # Start at 1 to skip the title
+    # Look for regex matches of tags and if lines from the top contain tags, then skip
+    for i in range(1, len(md_text_lines)):
+        if re.search(r'(?<=\n|\r| )(#[^#\r\n]+#|#[^#\r\n ]+)', md_text_lines[i]) is None:
+            return i
+
+    return len(md_text_lines) - 1
 
 
 def main():
