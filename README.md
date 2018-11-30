@@ -9,20 +9,20 @@ I love using [Bear Notes](https://bear.app/) for note taking of all sorts. Recen
 ### Flags
 * `-h` or `--header-priority` is the Limiting Header Priority/Strength (whether you limit your Table of Contents to h3s or h4s)
 * `-t` or `--type` is the type of anchor you want to use (Github or Bear x-callback-url)
-* `--write` is a flag on whether you want to automatically write it into your Markdown file or Bear Note
+* `--no-write` is a flag on whether you want to disable the feature that automatically injects the ToC into your Markdown file or Bear Note
 * `-toc` or `--table-of-contents-style` is the Markdown style for your Table of Contents header
 
 ### With Bear
 ```sh
-python MarkdownBearGithubTOC.py -h <default: 3> -t bear [--write] "Bear Note Title"
+python MarkdownBearGithubTOC.py -h <default: 3> -t bear [--no-write] "Bear Note Title"
 ```
 
 ```sh
-python MarkdownBearGithubTOC.py -h <default: 3> -t bear [--write] "20703126-FA33-400A-B98E-F55F57E3EF48-47683-000143B2335758CA"
+python MarkdownBearGithubTOC.py -h <default: 3> -t bear [--no-write] "20703126-FA33-400A-B98E-F55F57E3EF48-47683-000143B2335758CA"
 ```
 
 ```sh
-python MarkdownBearGithubTOC.py -h <default: 3> -t bear [--write] "Bear Note Title 1" "Bear Note Title 2"
+python MarkdownBearGithubTOC.py -h <default: 3> -t bear [--no-write] "Bear Note Title 1" "Bear Note Title 2"
 ```
 
 * This allows you to take input a list of Bear Note titles or UUIDs and will inject the ToC into your note whether or not you submit the `--write` flag.
@@ -30,13 +30,13 @@ python MarkdownBearGithubTOC.py -h <default: 3> -t bear [--write] "Bear Note Tit
 
 | **Original Note**  | **Note with ToC** |
 | :---:  | :---:  |
-|![Original Note]()|![Note with ToC]()|
+|![Original Note](https://github.com/alexander-lee/markdown-github-bear-toc/blob/master/results/Original%20Note.png?raw=true)|![Note with ToC](https://github.com/alexander-lee/markdown-github-bear-toc/blob/master/results/Note%20With%20ToC.png?raw=true)|
 
 ### With Markdown Files
 ```sh
-python MarkdownBearGithubTOC.py -h <default: 3> -t github [--write] README.md
+python MarkdownBearGithubTOC.py -h <default: 3> -t github [--no-write] README.md
 ```
 
 ```sh
-python MarkdownBearGithubTOC.py -h <default: 3> -t github [--write] README.md Folder/README2.md
+python MarkdownBearGithubTOC.py -h <default: 3> -t github [--no-write] README.md Folder/README2.md
 ```

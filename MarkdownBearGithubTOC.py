@@ -26,13 +26,13 @@ parser.add_argument('-h', '--header-priority', type=int, dest='header_priority',
 parser.add_argument('-t', '--type', type=str.lower, dest='type', choices=['github', 'bear'], default='github',
                     help='(Default: github) Github Anchors or Bear Anchors')
 
-parser.add_argument('-w', '--write', dest='write', action='store_true',
-                    help='(Default: False) Whether or not write Table of Contents to file or note automatically')
+parser.add_argument('-nw', '--no-write', dest='write', action='store_false',
+                    help='(Default: True) Whether or not write Table of Contents to file or note automatically')
 
 parser.add_argument('-toc', '--table-of-contents-style', dest='toc', default='# Table of Contents',
                     help='(Default: \'# Table of Contents\') Table of Contents Style')
 
-parser.set_defaults(write=False)
+parser.set_defaults(write=True)
 
 args = parser.parse_args()
 params = vars(args)
