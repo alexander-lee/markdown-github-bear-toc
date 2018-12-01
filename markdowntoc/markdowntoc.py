@@ -7,6 +7,8 @@ from os import path
 import re
 import argparse
 from urllib.parse import quote
+import datetime as dt
+from dateutil.relativedelta import relativedelta
 
 HOME = os.getenv('HOME', '')
 
@@ -268,7 +270,7 @@ def create_table_of_contents_github():
 def find_note_contents_start(md_text_lines):
     """
     Some notes in Bear contain #tags near the title. This returns the index in the list that\
-    isn't the title or contains tags. If no index found, return len(md_text_lines) - 1
+    isn't the title or contains tags. If no index found, return len(md_text_lines)
     """
     # Start at 1 to skip the title
     # Look for regex matches of tags and if lines from the top contain tags, then skip
@@ -276,7 +278,12 @@ def find_note_contents_start(md_text_lines):
         if re.search(r'((?<=^)|(?<=\n|\r| ))(#[^#\r\n]+#|#[^#\r\n ]+)', md_text_lines[i]) is None:
             return i
 
-    return len(md_text_lines) - 1
+    return len(md_text_lines)
+
+
+def convert_bear_timestamp(datetime=dt.datetime.now()):
+    """For some weird reason Bear's timestamps are 31 years behind, so this returns 'datetime' - 31 years as a Unix Timestamp."""
+    return (datetime - relativedelta(years=31)).timestamp()
 
 
 def main():
@@ -294,15 +301,17 @@ def main():
             text_list = md_text.splitlines()
             content_start = find_note_contents_start(text_list)
 
-            updated_text_list = [*text_list[:content_start], '', *toc_lines, '', *text_list[content_start + 1:]]
+            updated_text_list = [*text_list[:content_start], '', *toc_lines, '', *text_list[content_start:]]
+            # Regex extracts anchor text from ancho
+            # NOTE: There are edge cases with code blocks, bold, strikethroughs, etc...
+            subtitle_text = re.sub(r'\[([^\[\]]+)\]\([^\(\)]+\)', r'\1', ' '.join(updated_text_list[1:]))
             updated_md_text = '\n'.join(updated_text_list)
 
             if (params['type'] == 'bear'):
                 # Update Note with Table of Contents
-                update_query = "UPDATE `ZSFNOTE` SET `ZTEXT`=? WHERE `ZUNIQUEIDENTIFIER`=?"
-                cursor.execute(update_query, (updated_md_text, identifiers[i]))
+                update_query = "UPDATE `ZSFNOTE` SET `ZSUBTITLE`=?, `ZTEXT`=?, `ZMODIFICATIONDATE`=? WHERE `ZUNIQUEIDENTIFIER`=?"
+                cursor.execute(update_query, (subtitle_text, updated_md_text, convert_bear_timestamp(), identifiers[i]))
                 conn.commit()
-                pass
             elif (params['type'] == 'github'):
                 # Update File
                 with open(identifiers[i], 'w') as file:
@@ -316,7 +325,8 @@ if __name__ == '__main__':
     main()
 
     if params['type'] == 'bear' and params['write']:
-        print('==== [DONE] ====')
+        print('==================== [DONE] ====================')
+        print('[WARNING]: There still might be syncing issues with iCloud, for a precautionary measure, edit the note again.')
         print('To see your changes, please restart Bear!')
 
     if params['type'] == 'bear':
