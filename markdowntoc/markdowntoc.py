@@ -167,7 +167,7 @@ def create_github_header_anchor(header_title):
     """
     Returns a Github Markdown anchor to the header.
     """
-    return '[{}](#{})'.format(header_title, header_title.replace(' ', '-'))
+    return '[{}](#{})'.format(header_title, header_title.replace(' ', '-').lower())
 
 
 def create_table_of_contents(header_priority_pairs, note_uuid=None):
