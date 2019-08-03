@@ -29,7 +29,8 @@ parser.add_argument('-t', '--type', type=str.lower, dest='type', choices=['githu
                     help='(Default: github) Github Anchors or Bear Anchors')
 
 parser.add_argument('--no-write', dest='write', action='store_false',
-                    help='(Default: True) Whether or not write Table of Contents to file or note automatically')
+                    help='Whether or not write Table of Contents to file or note automatically or output to the console.\
+                          Add this flag to TURN OFF the automatic writing.')
 
 parser.add_argument('-toc', '--table-of-contents-style', dest='toc', default='# Table of Contents',
                     help='(Default: \'# Table of Contents\') Table of Contents Style')
@@ -167,7 +168,7 @@ def create_github_header_anchor(header_title):
     """
     Returns a Github Markdown anchor to the header.
     """
-    return '[{}](#{})'.format(header_title, header_title.replace(' ', '-'))
+    return '[{}](#{})'.format(header_title, header_title.strip().replace(' ', '-'))
 
 
 def create_table_of_contents(header_priority_pairs, note_uuid=None):
@@ -328,8 +329,6 @@ if __name__ == '__main__':
         print('==================== [DONE] ====================')
         print('[WARNING]: There still might be syncing issues with iCloud, for a precautionary measure, edit the note again.')
         print('To see your changes, please restart Bear!')
-
-    if params['type'] == 'bear':
         conn.close()
 
 
