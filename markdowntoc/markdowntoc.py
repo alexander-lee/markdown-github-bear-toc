@@ -25,7 +25,7 @@ parser.add_argument('name', nargs='+', type=str,
 parser.add_argument('-h', '--header-priority', type=int, dest='header_priority', default=3,
                     help='(Default: 3) Maximum Header Priority/Strength to consider as Table of Contents')
 
-parser.add_argument('-t', '--type', type=str.lower, dest='type', choices=['github', 'bear'], default='github',
+parser.add_argument('-t', '--type', type=str.lower, dest='type', choices=['gitlab', 'github', 'bear'], default='github',
                     help='(Default: github) Github Anchors or Bear Anchors')
 
 parser.add_argument('--no-write', dest='write', action='store_false',
@@ -170,6 +170,11 @@ def create_github_header_anchor(header_title):
     """
     return '[{}](#{})'.format(header_title, header_title.strip().replace(' ', '-'))
 
+def create_gitlab_header_anchor(header_title):
+    """
+    Returns a Gitlab Markdown anchor to the header.
+    """
+    return '[{}](#{})'.format(header_title, header_title.lower().strip().replace(' ', '-'))
 
 def create_table_of_contents(header_priority_pairs, note_uuid=None):
     """
@@ -182,7 +187,10 @@ def create_table_of_contents(header_priority_pairs, note_uuid=None):
 
     highest_priority = min(header_priority_pairs, key=lambda pair: pair[1])[1]
     for header, priority in header_priority_pairs:
-        md_anchor = create_bear_header_anchor(header, note_uuid) if params['type'] == 'bear' else create_github_header_anchor(header)
+        md_anchor = create_bear_header_anchor(header, note_uuid) if params['type'] == 'bear' \
+            else create_github_header_anchor(header) if params['type'] == 'github' \
+            else create_gitlab_header_anchor(header)
+
         bullet_list.append('\t' * (priority - highest_priority) + '* ' + md_anchor)
 
     # Specifically for Bear add separator
@@ -227,7 +235,7 @@ def create_table_of_contents_bear():
     return md_text_toc_pairs, uuids
 
 
-def create_table_of_contents_github():
+def create_table_of_contents_github_or_gitlab():
     """
     Read from file and returns list of (Original Text, Table of Contents List).
     """
@@ -294,7 +302,7 @@ def main():
     if (params['type'] == 'bear'):
         md_text_toc_pairs, identifiers = create_table_of_contents_bear()
     elif (params['type'] == 'github'):
-        md_text_toc_pairs, identifiers = create_table_of_contents_github()
+        md_text_toc_pairs, identifiers = create_table_of_contents_github_or_gitlab()
 
     for i, (md_text, toc_lines) in enumerate(md_text_toc_pairs):
         if (params['write']):
