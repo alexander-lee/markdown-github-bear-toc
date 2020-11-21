@@ -51,7 +51,7 @@ def get_notes_from_bear():
     Returns all Bear Notes specified which have specified title or UUID.
     """
     # Get all Unarchived notes from Bear
-    read_query = "SELECT * FROM `ZSFNOTE` WHERE `ZTRASHED` LIKE '0' AND `ZARCHIVED` LIKE '0'"
+    read_query = "SELECT * FROM `ZSFNOTE` WHERE `ZTRASHED` LIKE '0' AND `ZARCHIVED` LIKE '0' AND `ZENCRYPTED` LIKE 0"
     notes = cursor.execute(read_query)
 
     def match_title_uuid_tag(note):
