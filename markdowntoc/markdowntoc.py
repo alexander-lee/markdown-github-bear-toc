@@ -221,6 +221,7 @@ def create_table_of_contents(header_priority_pairs, note_uuid=None):
         return None
 
     bullet_list = [params["toc"]]
+    bullet_list.append("")
 
     highest_priority = min(header_priority_pairs, key=lambda pair: pair[1])[1]
     for header, priority in header_priority_pairs:
@@ -229,7 +230,7 @@ def create_table_of_contents(header_priority_pairs, note_uuid=None):
             if params["type"] == "bear"
             else create_github_header_anchor(header)
         )
-        bullet_list.append("\t" * (priority - highest_priority) + "* " + md_anchor)
+        bullet_list.append("  " * (priority - highest_priority) + "- " + md_anchor)
 
     # Specifically for Bear add separator
     if params["type"] == "bear":
@@ -299,14 +300,6 @@ def create_table_of_contents_github():
             with open(filepath, "r") as file:
                 md_text = file.read()
 
-                if has_table_of_contents(md_text):
-                    print(
-                        "[WARNING]: {} already has a Table of Contents, Ignoring...".format(
-                            filepath
-                        )
-                    )
-                    continue
-
                 header_list = get_headers(md_text, params["header_priority"])
                 table_of_contents_lines = create_table_of_contents(header_list)
 
@@ -351,7 +344,7 @@ def find_toc_start(md_text_lines):
 def find_toc_end(md_text_lines):
     for i, line in enumerate(md_text_lines):
         if "<!-- tocstop -->" in line:
-            return i + 1
+            return i
 
     return len(md_text_lines)
 
