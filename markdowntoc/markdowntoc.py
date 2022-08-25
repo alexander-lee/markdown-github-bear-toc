@@ -10,37 +10,68 @@ from urllib.parse import quote
 import datetime as dt
 from dateutil.relativedelta import relativedelta
 
-HOME = os.getenv('HOME', '')
+HOME = os.getenv("HOME", "")
 
-bear_db = path.join(HOME, 'Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite')
+bear_db = path.join(
+    HOME,
+    "Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite",
+)
 
-parser = argparse.ArgumentParser(description='Markdown Table of Contents Generator for Bear or Github', add_help=False)
+parser = argparse.ArgumentParser(
+    description="Markdown Table of Contents Generator for Bear or Github",
+    add_help=False,
+)
 
-parser.add_argument('--help', action='help',
-                    help='Show this help message and exit')
+parser.add_argument("--help", action="help", help="Show this help message and exit")
 
-parser.add_argument('name', nargs='+', type=str,
-                    help='Bear Note UUID, Bear Note Title, Bear Note Tag, or Markdown file')
+parser.add_argument(
+    "name",
+    nargs="+",
+    type=str,
+    help="Bear Note UUID, Bear Note Title, Bear Note Tag, or Markdown file",
+)
 
-parser.add_argument('-h', '--header-priority', type=int, dest='header_priority', default=3,
-                    help='(Default: 3) Maximum Header Priority/Strength to consider as Table of Contents')
+parser.add_argument(
+    "-h",
+    "--header-priority",
+    type=int,
+    dest="header_priority",
+    default=3,
+    help="(Default: 3) Maximum Header Priority/Strength to consider as Table of Contents",
+)
 
-parser.add_argument('-t', '--type', type=str.lower, dest='type', choices=['github', 'bear'], default='github',
-                    help='(Default: github) Github Anchors or Bear Anchors')
+parser.add_argument(
+    "-t",
+    "--type",
+    type=str.lower,
+    dest="type",
+    choices=["github", "bear"],
+    default="github",
+    help="(Default: github) Github Anchors or Bear Anchors",
+)
 
-parser.add_argument('--no-write', dest='write', action='store_false',
-                    help='Whether or not write Table of Contents to file or note automatically or output to the console.\
-                          Add this flag to TURN OFF the automatic writing.')
+parser.add_argument(
+    "--no-write",
+    dest="write",
+    action="store_false",
+    help="Whether or not write Table of Contents to file or note automatically or output to the console.\
+                          Add this flag to TURN OFF the automatic writing.",
+)
 
-parser.add_argument('-toc', '--table-of-contents-style', dest='toc', default='# Table of Contents',
-                    help='(Default: \'# Table of Contents\') Table of Contents Style')
+parser.add_argument(
+    "-toc",
+    "--table-of-contents-style",
+    dest="toc",
+    default="# Table of Contents",
+    help="(Default: '# Table of Contents') Table of Contents Style",
+)
 
 parser.set_defaults(write=True)
 
 args = parser.parse_args()
 params = vars(args)
 
-if (params['type'] == 'bear'):
+if params["type"] == "bear":
     conn = sqlite3.connect(bear_db)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -55,9 +86,13 @@ def get_notes_from_bear():
     notes = cursor.execute(read_query)
 
     def match_title_uuid_tag(note):
-        note_tags = get_tags_in_note(note['ZTEXT'])
-        for query in params['name']:
-            if query in note_tags or query == note['ZTITLE'] or query == note['ZUNIQUEIDENTIFIER']:
+        note_tags = get_tags_in_note(note["ZTEXT"])
+        for query in params["name"]:
+            if (
+                query in note_tags
+                or query == note["ZTITLE"]
+                or query == note["ZUNIQUEIDENTIFIER"]
+            ):
                 return True
         return False
 
@@ -75,13 +110,13 @@ def get_tags_in_note(md_text):
     lines_iter = iter(md_text.splitlines())
     in_code_block = False
     for line in lines_iter:
-        if line.startswith('```'):
+        if line.startswith("```"):
             in_code_block = not in_code_block
 
         if not in_code_block:
             text_no_code.append(line)
 
-    text_no_code = '\n'.join(text_no_code)
+    text_no_code = "\n".join(text_no_code)
 
     # Match all tags
     # Positive Lookbehind 1: Start of character
@@ -89,7 +124,9 @@ def get_tags_in_note(md_text):
     # Group 1: Starts with '#' and ends with '#' as long as middle is not '#' or a newline character (#tags#)
     # Group 2: Starts with '#' and is not succeeded by a '#', ' ', or newline character (#tags)
     # We need two groups because '#tags#' can have spaces where '#tags' cannot
-    tag_matches = re.findall(r'((?<=^)|(?<=\n|\r| ))(#[^#\r\n]+#|#[^#\r\n ]+)', text_no_code, re.MULTILINE)
+    tag_matches = re.findall(
+        r"((?<=^)|(?<=\n|\r| ))(#[^#\r\n]+#|#[^#\r\n ]+)", text_no_code, re.MULTILINE
+    )
     tag_matches = map(lambda match: match[1], tag_matches)  # Second Capture Group
     return set(tag_matches)
 
@@ -98,7 +135,10 @@ def has_table_of_contents(md_text):
     """
     Return True or False whether or not a Table of Contents header already exists in the given Markdown text.
     """
-    return re.search(r'^#+\sTable\sof\sContents', md_text, re.IGNORECASE | re.MULTILINE) is not None
+    return (
+        re.search(r"^#+\sTable\sof\sContents", md_text, re.IGNORECASE | re.MULTILINE)
+        is not None
+    )
 
 
 def get_headers(md_text, max_priority):
@@ -116,11 +156,11 @@ def get_headers(md_text, max_priority):
     header_priority_pairs = []
     in_code_block = False
     for line in lines_iter:
-        if line.startswith('```'):
+        if line.startswith("```"):
             in_code_block = not in_code_block
 
-        elif not in_code_block and line.startswith('#') and ' ' in line:
-            md_header, header_title = line.split(' ', 1)
+        elif not in_code_block and line.startswith("#") and " " in line:
+            md_header, header_title = line.split(" ", 1)
 
             # Check if md_header has all '#'
             if md_header != md_header[0] * len(md_header):
@@ -130,7 +170,7 @@ def get_headers(md_text, max_priority):
             if len(md_header) > max_priority:
                 continue
 
-            if header_title.lower() != 'table of contents' and len(header_title) > 1:
+            if header_title.lower() != "table of contents" and len(header_title) > 1:
                 header_priority_pairs.append((header_title, len(md_header)))
 
     return sequentialize_header_priorities(header_priority_pairs)
@@ -150,7 +190,7 @@ def sequentialize_header_priorities(header_priority_pairs):
         header, priority = header_priority_pairs[i]
         next_header, next_priority = header_priority_pairs[i + 1]
 
-        if (next_priority - priority > 1):
+        if next_priority - priority > 1:
             header_priority_pairs[i + 1] = (next_header, priority + 1)
 
     return header_priority_pairs
@@ -161,14 +201,16 @@ def create_bear_header_anchor(header_title, note_uuid):
     Returns a markdown anchor of a Bear x-callback-url to the header.
     """
     header_title_url_safe = quote(header_title)
-    return '[{}](bear://x-callback-url/open-note?id={}&header={})'.format(header_title, note_uuid, header_title_url_safe)
+    return "[{}](bear://x-callback-url/open-note?id={}&header={})".format(
+        header_title, note_uuid, header_title_url_safe
+    )
 
 
 def create_github_header_anchor(header_title):
     """
     Returns a Github Markdown anchor to the header.
     """
-    return '[{}](#{})'.format(header_title, header_title.strip().replace(' ', '-'))
+    return "[{}](#{})".format(header_title, header_title.strip().replace(" ", "-"))
 
 
 def create_table_of_contents(header_priority_pairs, note_uuid=None):
@@ -178,16 +220,21 @@ def create_table_of_contents(header_priority_pairs, note_uuid=None):
     if len(header_priority_pairs) == 0:
         return None
 
-    bullet_list = [params['toc']]
+    bullet_list = [params["toc"]]
+    bullet_list.append("")
 
     highest_priority = min(header_priority_pairs, key=lambda pair: pair[1])[1]
     for header, priority in header_priority_pairs:
-        md_anchor = create_bear_header_anchor(header, note_uuid) if params['type'] == 'bear' else create_github_header_anchor(header)
-        bullet_list.append('\t' * (priority - highest_priority) + '* ' + md_anchor)
+        md_anchor = (
+            create_bear_header_anchor(header, note_uuid)
+            if params["type"] == "bear"
+            else create_github_header_anchor(header)
+        )
+        bullet_list.append("  " * (priority - highest_priority) + "- " + md_anchor)
 
     # Specifically for Bear add separator
-    if params['type'] == 'bear':
-        bullet_list.append('---')
+    if params["type"] == "bear":
+        bullet_list.append("---")
 
     return bullet_list
 
@@ -201,25 +248,33 @@ def create_table_of_contents_bear():
     uuids = []
 
     for row in notes:
-        title = row['ZTITLE']
-        md_text = row['ZTEXT'].rstrip()
-        uuid = row['ZUNIQUEIDENTIFIER']
+        title = row["ZTITLE"]
+        md_text = row["ZTEXT"].rstrip()
+        uuid = row["ZUNIQUEIDENTIFIER"]
         # creation_date = row['ZCREATIONDATE']
         # modified = row['ZMODIFICATIONDATE']
 
         if has_table_of_contents(md_text):
-            print('[WARNING]: \'{}\' already has a Table of Contents, Ignoring...'.format(title))
+            print(
+                "[WARNING]: '{}' already has a Table of Contents, Ignoring...".format(
+                    title
+                )
+            )
             continue
 
-        header_list = get_headers(md_text, params['header_priority'])
+        header_list = get_headers(md_text, params["header_priority"])
         table_of_contents_lines = create_table_of_contents(header_list, uuid)
 
         if table_of_contents_lines is None:
-            print('[WARNING]: \'{}\' has no headers to create a Table of Contents, Ignoring...'.format(title))
+            print(
+                "[WARNING]: '{}' has no headers to create a Table of Contents, Ignoring...".format(
+                    title
+                )
+            )
             continue
 
-        if (params['write']):
-            print('Creating a Table of Contents for \'{}\''.format(title))
+        if params["write"]:
+            print("Creating a Table of Contents for '{}'".format(title))
 
         md_text_toc_pairs.append((md_text, table_of_contents_lines))
         uuids.append(uuid)
@@ -234,49 +289,61 @@ def create_table_of_contents_github():
     md_text_toc_pairs = []
     valid_filepaths = []
 
-    for filepath in params['name']:
+    for filepath in params["name"]:
         name, ext = path.splitext(filepath)
 
-        if ext.lower() != '.md':
-            print('[WARNING]: {} is not a Markdown File, Ignoring...'.format(filepath))
+        if ext.lower() != ".md":
+            print("[WARNING]: {} is not a Markdown File, Ignoring...".format(filepath))
             continue
 
         try:
-            with open(filepath, 'r') as file:
+            with open(filepath, "r") as file:
                 md_text = file.read()
 
-                if has_table_of_contents(md_text):
-                    print('[WARNING]: {} already has a Table of Contents, Ignoring...'.format(filepath))
-                    continue
-
-                header_list = get_headers(md_text, params['header_priority'])
+                header_list = get_headers(md_text, params["header_priority"])
                 table_of_contents_lines = create_table_of_contents(header_list)
 
                 if table_of_contents_lines is None:
-                    print('[WARNING]: {} has no headers to create a Table of Contents, Ignoring...'.format(filepath))
+                    print(
+                        "[WARNING]: {} has no headers to create a Table of Contents, Ignoring...".format(
+                            filepath
+                        )
+                    )
                     continue
 
-                if (params['write']):
-                    print('Creating a Table of Contents for \'{}\''.format(filepath))
+                if params["write"]:
+                    print("Creating a Table of Contents for '{}'".format(filepath))
 
                 md_text_toc_pairs.append((md_text, table_of_contents_lines))
                 valid_filepaths.append(filepath)
 
         except OSError:
-            print('[ERROR]: {} doesn\'t exist or cannot be read, Ignoring...'.format(filepath))
+            print(
+                "[ERROR]: {} doesn't exist or cannot be read, Ignoring...".format(
+                    filepath
+                )
+            )
 
     return md_text_toc_pairs, valid_filepaths
 
 
-def find_note_contents_start(md_text_lines):
+def find_toc_start(md_text_lines):
     """
     Some notes in Bear contain #tags near the title. This returns the index in the list that\
     isn't the title or contains tags. If no index found, return len(md_text_lines)
     """
     # Start at 1 to skip the title
     # Look for regex matches of tags and if lines from the top contain tags, then skip
-    for i in range(1, len(md_text_lines)):
-        if re.search(r'((?<=^)|(?<=\n|\r| ))(#[^#\r\n]+#|#[^#\r\n ]+)', md_text_lines[i]) is None:
+    for i, line in enumerate(md_text_lines):
+        if "<!-- toc -->" in line:
+            return i + 1
+
+    return len(md_text_lines)
+
+
+def find_toc_end(md_text_lines):
+    for i, line in enumerate(md_text_lines):
+        if "<!-- tocstop -->" in line:
             return i
 
     return len(md_text_lines)
@@ -291,44 +358,63 @@ def main():
     md_text_toc_pairs = None
     identifiers = None  # Either Bear Note UUIDs or File Paths
 
-    if (params['type'] == 'bear'):
+    if params["type"] == "bear":
         md_text_toc_pairs, identifiers = create_table_of_contents_bear()
-    elif (params['type'] == 'github'):
+    elif params["type"] == "github":
         md_text_toc_pairs, identifiers = create_table_of_contents_github()
 
     for i, (md_text, toc_lines) in enumerate(md_text_toc_pairs):
-        if (params['write']):
+        if params["write"]:
             # Inject Table of Contents (Title, \n, Table of Contents, \n, Content)
             text_list = md_text.splitlines()
-            content_start = find_note_contents_start(text_list)
+            toc_start = find_toc_start(text_list)
+            toc_end = find_toc_end(text_list)
 
-            updated_text_list = [*text_list[:content_start], '', *toc_lines, '', *text_list[content_start:]]
+            updated_text_list = [
+                *text_list[:toc_start],
+                "",
+                *toc_lines,
+                "",
+                *text_list[toc_end:],
+            ]
             # Regex extracts anchor text from ancho
             # NOTE: There are edge cases with code blocks, bold, strikethroughs, etc...
-            subtitle_text = re.sub(r'\[([^\[\]]+)\]\([^\(\)]+\)', r'\1', ' '.join(updated_text_list[1:]))
-            updated_md_text = '\n'.join(updated_text_list)
+            subtitle_text = re.sub(
+                r"\[([^\[\]]+)\]\([^\(\)]+\)", r"\1", " ".join(updated_text_list[1:])
+            )
+            updated_md_text = "\n".join(updated_text_list)
 
-            if (params['type'] == 'bear'):
+            if params["type"] == "bear":
                 # Update Note with Table of Contents
                 update_query = "UPDATE `ZSFNOTE` SET `ZSUBTITLE`=?, `ZTEXT`=?, `ZMODIFICATIONDATE`=? WHERE `ZUNIQUEIDENTIFIER`=?"
-                cursor.execute(update_query, (subtitle_text, updated_md_text, convert_bear_timestamp(), identifiers[i]))
+                cursor.execute(
+                    update_query,
+                    (
+                        subtitle_text,
+                        updated_md_text,
+                        convert_bear_timestamp(),
+                        identifiers[i],
+                    ),
+                )
                 conn.commit()
-            elif (params['type'] == 'github'):
+            elif params["type"] == "github":
                 # Update File
-                with open(identifiers[i], 'w') as file:
+                with open(identifiers[i], "w") as file:
                     file.write(updated_md_text)
 
         else:
-            print('\n'.join(toc_lines) + '\n')
+            print("\n".join(toc_lines) + "\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
-    if params['type'] == 'bear' and params['write']:
-        print('==================== [DONE] ====================')
-        print('[WARNING]: There still might be syncing issues with iCloud, for a precautionary measure, edit the note again.')
-        print('To see your changes, please restart Bear!')
+    if params["type"] == "bear" and params["write"]:
+        print("==================== [DONE] ====================")
+        print(
+            "[WARNING]: There still might be syncing issues with iCloud, for a precautionary measure, edit the note again."
+        )
+        print("To see your changes, please restart Bear!")
         conn.close()
 
 
