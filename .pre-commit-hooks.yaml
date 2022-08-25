@@ -1,0 +1,5 @@
+-   id: markdown-toc
+    name: Insert a table of contents in Markdown files, like a README.md
+    entry: markdown-toc
+    language: python
+    files: .*\.md$
