@@ -268,16 +268,24 @@ def create_table_of_contents_github():
     return md_text_toc_pairs, valid_filepaths
 
 
-def find_note_contents_start(md_text_lines):
+def find_toc_start(md_text_lines):
     """
     Some notes in Bear contain #tags near the title. This returns the index in the list that\
     isn't the title or contains tags. If no index found, return len(md_text_lines)
     """
     # Start at 1 to skip the title
     # Look for regex matches of tags and if lines from the top contain tags, then skip
-    for i in range(1, len(md_text_lines)):
-        if re.search(r'((?<=^)|(?<=\n|\r| ))(#[^#\r\n]+#|#[^#\r\n ]+)', md_text_lines[i]) is None:
-            return i
+    for i, line in enumerate(md_text_lines):
+        if "<!-- toc -->" in line:
+            return i + 1
+
+    return len(md_text_lines)
+
+
+def find_toc_end(md_text_lines):
+    for i, line in enumerate(md_text_lines):
+        if "<!-- tocstop -->" in line:
+            return i + 1
 
     return len(md_text_lines)
 
@@ -300,9 +308,10 @@ def main():
         if (params['write']):
             # Inject Table of Contents (Title, \n, Table of Contents, \n, Content)
             text_list = md_text.splitlines()
-            content_start = find_note_contents_start(text_list)
+            toc_start = find_toc_start(text_list)
+            toc_end = find_toc_end(text_list)
 
-            updated_text_list = [*text_list[:content_start], '', *toc_lines, '', *text_list[content_start:]]
+            updated_text_list = [*text_list[:toc_start], '', *toc_lines, '', *text_list[toc_end:]]
             # Regex extracts anchor text from ancho
             # NOTE: There are edge cases with code blocks, bold, strikethroughs, etc...
             subtitle_text = re.sub(r'\[([^\[\]]+)\]\([^\(\)]+\)', r'\1', ' '.join(updated_text_list[1:]))
