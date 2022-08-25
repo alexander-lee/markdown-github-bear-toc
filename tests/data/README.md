@@ -6,20 +6,24 @@ GDC internship project for generating data model source code.
 
 <!-- toc -->
 
-- [Purpose](#purpose)
-- [Goal](#goal)
-- [Data Commons Models](#data-commons-models)
-  - [Problems:](#problems)
-- [Project Details](#project-details)
-  - [Requirements](#requirements)
-  - [Features](#features)
-  - [Dictionary selection and loading](#dictionary-selection-and-loading)
-  - [Template Management](#template-management)
-- [How to use](#how-to-use)
-  - [Install plaster](#install-plaster)
-  - [Generate gdcdictionary](#generate-gdcdictionary)
-  - [Generate biodictionary](#generate-biodictionary)
-- [Associated Projects](#associated-projects)
+# Table of Contents
+
+- [The Data Commons Model Source Generator Project (Plaster)](#The-Data-Commons-Model-Source-Generator-Project-(Plaster))
+- [Purpose](#Purpose)
+- [Goal](#Goal)
+- [Data Commons Models](#Data-Commons-Models)
+  - [Problems:](#Problems:)
+- [Project Details](#Project-Details)
+  - [Requirements](#Requirements)
+  - [Features](#Features)
+  - [Dictionary selection and loading](#Dictionary-selection-and-loading)
+  - [Template Management](#Template-Management)
+- [How to use](#How-to-use)
+  - [Install plaster](#Install-plaster)
+  - [Generate gdcdictionary](#Generate-gdcdictionary)
+  - [Generate biodictionary](#Generate-biodictionary)
+- [Associated Projects](#Associated-Projects)
+- [Repo Visualizer](#Repo-Visualizer)
 
 <!-- tocstop -->
 
