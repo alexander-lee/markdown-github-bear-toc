@@ -207,7 +207,7 @@ def create_table_of_contents_bear():
         # creation_date = row['ZCREATIONDATE']
         # modified = row['ZMODIFICATIONDATE']
 
-        if has_table_of_contents(md_text):
+        if has_table_of_contents(md_text) and params['write']:
             print('[WARNING]: \'{}\' already has a Table of Contents, Ignoring...'.format(title))
             continue
 
@@ -245,7 +245,7 @@ def create_table_of_contents_github():
             with open(filepath, 'r') as file:
                 md_text = file.read()
 
-                if has_table_of_contents(md_text):
+                if has_table_of_contents(md_text) and params['write']:
                     print('[WARNING]: {} already has a Table of Contents, Ignoring...'.format(filepath))
                     continue
 
